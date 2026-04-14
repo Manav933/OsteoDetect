@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: osteo-backend
+    env: python
+    buildCommand: "cd backend && pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput"
+    startCommand: "cd backend && gunicorn config.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: osteo-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ML_SERVICE_URL
+        value: "https://osteo-ml-service.onrender.com"
+
+  - type: web
+    name: osteo-ml-service
+    env: python
+    buildCommand: "cd ml_service && pip install -r requirements.txt"
+    startCommand: "cd ml_service && uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+
+databases:
+  - name: osteo-db
+    databaseName: osteodb
+    user: osteouser

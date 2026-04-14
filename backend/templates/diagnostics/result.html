@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="card" style="border-top: 4px solid var(--highlight-color); border-radius: 16px;">
+    <div class="page-header">
+        <div>
+            <h2 style="margin: 0; font-size: 1.8rem;">{% trans "Diagnosis Results" %}</h2>
+            <p style="margin: 0.5rem 0 0 0; color: var(--text-muted);">{% trans "Patient:" %} <strong>{{ diagnosis.patient.first_name }} {{ diagnosis.patient.last_name }}</strong> | {% trans "Category:" %} {{ diagnosis.age_category }}</p>
+        </div>
+        <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+            <a href="{% url 'diagnosis_report_pdf' diagnosis.id %}" class="btn btn-success">{% trans "Download PDF" %}</a>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">← {% trans "Back to Dashboard" %}</a>
+        </div>
+    </div>
+
+    {% if diagnosis.status == 'COMPLETED' %}
+        <div class="page-grid-equal">
+            <div>
+                <h3 style="margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">{% trans "X-Ray Scan & Grad-CAM" %}</h3>
+                <div style="background: #fff; padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; position: relative;">
+                    {% if diagnosis.xray_image %}
+                        <img src="{{ diagnosis.xray_image.url }}" alt="X-Ray" style="max-width: 100%; border-radius: 8px; max-height: 400px; object-fit: contain;">
+                    {% endif %}
+                    
+                    {% if diagnosis.heatmap_image %}
+                         <img src="{{ diagnosis.heatmap_image.url }}" alt="Grad-CAM" style="position:absolute; top:1rem; left:0; width:100%; height:80%; opacity:0.6; mix-blend-mode: screen; pointer-events:none;">
+                    {% endif %}
+                </div>
+            </div>
+
+            <div>
+                <h3 style="margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">{% trans "AI Inference Analysis" %}</h3>
+                
+                <div style="background: #fff; border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem;">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                        <span style="font-weight: 500; color: var(--text-muted);">{% trans "Prediction Class:" %}</span>
+                        <span style="font-size: 1.4rem; font-weight: 700; color: #6a4f0f;">{{ diagnosis.pred_class|default:"Unknown" }}</span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span style="font-weight: 500; color: var(--text-muted);">{% trans "Confidence Score:" %}</span>
+                        <span style="font-size: 1.4rem; font-weight: 700;">{{ diagnosis.confidence_score|default:"N/A" }}%</span>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; padding: 1.25rem; background: #f8f3e9; border-radius: 8px; border-left: 4px solid var(--highlight-color);">
+                        <strong style="display:block; margin-bottom:0.5rem; font-size: 1rem;">{% trans "Clinical Explanation" %}</strong>
+                        <p style="margin:0; font-size: 0.95rem; color: var(--text-muted); line-height: 1.5;">{{ diagnosis.error_message }}</p>
+                    </div>
+
+                    <div style="margin-top: 2rem;">
+                        <span style="font-weight: 600; display: block; margin-bottom: 1rem;">{% trans "Overall Risk Factor:" %}</span>
+                        <div style="width: 100%; height: 28px; background-color: #f5ede1; border-radius: 14px; overflow: hidden; display: flex; border: 1px solid var(--border-color);">
+                            <div style="height: 100%; width: 33.33%; background: {% if diagnosis.risk_level == 'LOW' %}linear-gradient(90deg, #16a34a, #22c55e){% else %}transparent{% endif %}; border-right: 1px solid var(--border-color);"></div>
+                            <div style="height: 100%; width: 33.33%; background: {% if diagnosis.risk_level == 'MEDIUM' %}linear-gradient(90deg, #d97706, #f59e0b){% else %}transparent{% endif %}; border-right: 1px solid var(--border-color);"></div>
+                            <div style="height: 100%; width: 33.33%; background: {% if diagnosis.risk_level == 'HIGH' %}linear-gradient(90deg, #dc2626, #ef4444){% else %}transparent{% endif %};"></div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-top: 0.75rem; font-weight: 600; color: var(--text-muted);">
+                            <span style="color: {% if diagnosis.risk_level == 'LOW' %}var(--success){% endif %}">{% trans "Low Risk" %}</span>
+                            <span style="color: {% if diagnosis.risk_level == 'MEDIUM' %}var(--warning){% endif %}">{% trans "Medium Risk" %}</span>
+                            <span style="color: {% if diagnosis.risk_level == 'HIGH' %}var(--danger){% endif %}">{% trans "High Risk" %}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% elif diagnosis.status == 'FAILED' %}
+        <div style="background-color: #fce8e6; padding: 2rem; border-radius: 8px; text-align: center; border: 1px solid var(--danger);">
+            <h3 style="color: var(--danger); margin-top: 0;">{% trans "Analysis Failed" %}</h3>
+            <p>{% trans "There was an error communicating with the ML diagnostic service. Please try again or contact IT support." %}</p>
+            <p style="font-size: 0.9rem; color: #666; font-family: monospace;">{% trans "Error:" %} {{ diagnosis.error_message }}</p>
+        </div>
+    {% else %}
+        <div style="padding: 3rem; text-align: center;">
+            <h3>{% trans "Analyzing..." %}</h3>
+            <p>{% trans "Please wait while the multi-modal model analyzes the X-ray and structural data." %}</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

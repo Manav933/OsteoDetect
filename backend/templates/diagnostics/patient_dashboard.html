@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-grid">
+    <div>
+        <div class="card" style="border-left: 4px solid var(--highlight-color);">
+            <h2 style="margin-top: 0;">Hello, {{ user.first_name }}</h2>
+            <p style="color: var(--text-muted); font-size: 1.05rem;">Upload new scans, review your reports, and monitor your history over time.</p>
+            <a href="{% url 'diagnosis_create' %}" class="btn btn-primary" style="margin-top: 1rem;">+ Upload New Scan</a>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-top: 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Your Scanning History</h3>
+            {% if recent_diagnoses %}
+                <div style="overflow-x: auto;">
+                <table style="width: 100%; text-align: left; border-collapse: separate; border-spacing: 0;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 1rem; color: var(--text-muted); font-weight: 500; font-size: 0.9rem; text-transform: uppercase;">Date</th>
+                            <th style="padding: 1rem; color: var(--text-muted); font-weight: 500; font-size: 0.9rem; text-transform: uppercase;">Status</th>
+                            <th style="padding: 1rem; color: var(--text-muted); font-weight: 500; font-size: 0.9rem; text-transform: uppercase;">Risk Assessment</th>
+                            <th style="padding: 1rem; color: var(--text-muted); font-weight: 500; font-size: 0.9rem; text-transform: uppercase;">Analysis</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in recent_diagnoses %}
+                        <tr>
+                            <td style="padding: 1rem; border-bottom: 1px solid var(--border-color); color: var(--text-muted);">{{ record.created_at|date:"M d, Y" }}</td>
+                            <td style="padding: 1rem; border-bottom: 1px solid var(--border-color);">
+                                <span style="font-size: 0.75rem; padding: 0.35rem 0.6rem; border-radius: 20px; background-color: {% if record.status == 'COMPLETED' %}rgba(21,128,61,0.15){% else %}rgba(185,28,28,0.15){% endif %}; color: {% if record.status == 'COMPLETED' %}var(--success){% else %}var(--danger){% endif %}; font-weight: 600;">
+                                    {{ record.status }}
+                                </span>
+                            </td>
+                            <td style="padding: 1rem; border-bottom: 1px solid var(--border-color);">
+                                {% if record.risk_level == 'HIGH' %}<span style="color: var(--danger); font-weight: 600;">High Risk</span>
+                                {% elif record.risk_level == 'MEDIUM' %}<span style="color: var(--warning); font-weight: 600;">Medium Risk</span>
+                                {% elif record.risk_level == 'LOW' %}<span style="color: var(--highlight-color); font-weight: 600;">Low Risk</span>
+                                {% else %}<span style="color: var(--text-muted);">Pending</span>{% endif %}
+                            </td>
+                            <td style="padding: 1rem; border-bottom: 1px solid var(--border-color);">
+                                <a href="{% url 'diagnosis_detail' record.id %}" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">View Report</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+                {% if patient %}
+                <div style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem; text-align: center;">
+                    <a href="{% url 'patient_history' patient.id %}" style="color: var(--highlight-color); text-decoration: none; font-weight: 500;">View Full Longitudinal History &rarr;</a>
+                </div>
+                {% endif %}
+            {% else %}
+                <p style="color: var(--text-muted); font-style: italic; background: #fff; padding: 1.5rem; border-radius: 8px; text-align: center;">You have not uploaded any diagnosis records yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div>
+        <div class="card">
+            <h3 style="margin-top: 0; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Personal Profile</h3>
+            {% if patient %}
+            <div style="margin-bottom: 1rem;">
+                <span style="color: var(--text-muted); display: block; font-size: 0.85rem;">Full Name</span>
+                <strong>{{ patient.first_name }} {{ patient.last_name }}</strong>
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <span style="color: var(--text-muted); display: block; font-size: 0.85rem;">Date of Birth</span>
+                <strong>{{ patient.date_of_birth }}</strong>
+            </div>
+            <div style="margin-bottom: 1rem;">
+                <span style="color: var(--text-muted); display: block; font-size: 0.85rem;">Gender</span>
+                <strong>{{ patient.get_gender_display }}</strong>
+            </div>
+            {% else %}
+            <p style="color: var(--text-muted);">Profile verification pending.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto; border-top: 4px solid var(--highlight-color); border-radius: 16px;">
+    <h2 style="text-align: center; margin-bottom: 2rem;">{% trans "New Patient Diagnosis" %}</h2>
+    
+    <div class="wizard-steps" style="display:flex; justify-content:space-between; margin-bottom:2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; gap:0.75rem; flex-wrap:wrap;">
+        <div class="step" style="font-weight: 600; color: #6a4f0f;">✓ {% trans "1. Clinical Vitals" %}</div>
+        <div class="step" style="font-weight: 600; color: #6a4f0f;">✓ {% trans "2. Upload Scan" %}</div>
+        <div class="step" style="font-weight: 600; color: var(--text-muted);">{% trans "3. Neural Inference" %}</div>
+    </div>
+
+    <button type="button" class="btn" style="width: 100%; margin-bottom: 2rem; background-color: #fff; border: 1px dashed var(--border-color); color: var(--text-muted);" disabled>
+        {% trans "Voice dictation is currently unavailable for this form." %}
+    </button>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="page-grid-equal">
+            {% for field in form %}
+                {% if field.name != 'xray_image' %}
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="{{ field.id_for_label }}" style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; display: block; color: var(--text-muted);">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div style="color: var(--danger); font-size: 0.8rem; margin-top: 0.5rem;">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="form-group" style="margin-top: 3rem; padding: 2rem 1.4rem; border: 2px dashed #c5aa4e; border-radius: 12px; text-align: center; background: #fff;">
+            <label for="{{ form.xray_image.id_for_label }}" style="font-size: 1.1rem; cursor: pointer; display: block;">
+                <span style="font-size: 2.5rem; display: block; margin-bottom: 1rem;">📸</span>
+                {% trans "Upload Patient Deep Scan X-Ray" %}
+            </label>
+            <div style="margin-top: 1.5rem;">
+                <input type="file" name="{{ form.xray_image.name }}" id="{{ form.xray_image.id_for_label }}" style="margin: 0 auto; display: block; max-width: 300px; color: var(--text-muted); background: #fff; border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 8px;">
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 1rem;">{% trans "Supported formats: Medical JPG, PNG. Optimal 224x224. Max 5MB." %}</p>
+            {% if form.xray_image.errors %}
+                <div style="color: var(--danger); font-size: 0.85rem; margin-top: 0.5rem;">{{ form.xray_image.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div style="text-align: right; margin-top: 2rem;">
+            <button class="btn btn-primary" type="submit" style="padding: 1rem 2rem; font-size: 1.1rem; border-radius: 8px; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);">{% trans "Initiate Inference ➔" %}</button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-grid">
+    <div>
+        <div class="card" style="border-left: 4px solid var(--highlight-color);">
+            <h2 style="margin-top: 0;">Doctor Dashboard</h2>
+            <p class="text-muted" style="font-size: 1.02rem;">Manage patient records, review diagnoses, and run new osteoporosis assessments.</p>
+            <a href="{% url 'diagnosis_create' %}" class="btn btn-primary" style="margin-top: 0.5rem;">+ New Diagnosis</a>
+        </div>
+
+        <div class="card">
+            <div class="page-header" style="margin-bottom: 1rem;">
+                <h3 style="margin: 0;">Patients & Diagnoses</h3>
+                <form method="get" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                    <input type="text" name="q" value="{{ search_query }}" placeholder="Search patient name" style="padding:0.55rem 0.7rem; border:1px solid var(--border-color); border-radius:8px;">
+                    <select name="risk" style="padding:0.55rem 0.7rem; border:1px solid var(--border-color); border-radius:8px;">
+                        <option value="">All risk</option>
+                        <option value="LOW" {% if risk_filter == 'LOW' %}selected{% endif %}>Low</option>
+                        <option value="MEDIUM" {% if risk_filter == 'MEDIUM' %}selected{% endif %}>Medium</option>
+                        <option value="HIGH" {% if risk_filter == 'HIGH' %}selected{% endif %}>High</option>
+                    </select>
+                    <button type="submit" class="btn btn-success" style="padding:0.55rem 0.85rem;">Apply</button>
+                </form>
+            </div>
+            {% if recent_diagnoses %}
+                <div style="overflow-x: auto;">
+                <table style="width: 100%; text-align: left; border-collapse: separate; border-spacing: 0;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 0.9rem; color: var(--text-muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid var(--border-color);">Patient</th>
+                            <th style="padding: 0.9rem; color: var(--text-muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid var(--border-color);">Date</th>
+                            <th style="padding: 0.9rem; color: var(--text-muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid var(--border-color);">Status</th>
+                            <th style="padding: 0.9rem; color: var(--text-muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid var(--border-color);">Risk</th>
+                            <th style="padding: 0.9rem; color: var(--text-muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid var(--border-color);">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in recent_diagnoses %}
+                        <tr style="transition: background-color 0.2s ease;">
+                            <td style="padding: 0.9rem; border-bottom: 1px solid var(--border-color);">{{ record.patient.first_name }} {{ record.patient.last_name }}</td>
+                            <td style="padding: 0.9rem; border-bottom: 1px solid var(--border-color);" class="text-muted">{{ record.created_at|date:"M d, Y" }}</td>
+                            <td style="padding: 0.9rem; border-bottom: 1px solid var(--border-color);">
+                                <span style="font-size: 0.75rem; padding: 0.35rem 0.6rem; border-radius: 20px; background-color: {% if record.status == 'COMPLETED' %}rgba(21,128,61,0.12){% else %}rgba(185,28,28,0.12){% endif %}; color: {% if record.status == 'COMPLETED' %}var(--success){% else %}var(--danger){% endif %}; font-weight: 600;">
+                                    {{ record.status }}
+                                </span>
+                            </td>
+                            <td style="padding: 0.9rem; border-bottom: 1px solid var(--border-color);">
+                                {% if record.risk_level == 'HIGH' %}<span style="color: var(--danger); font-weight: 600;">High</span>
+                                {% elif record.risk_level == 'MEDIUM' %}<span style="color: var(--warning); font-weight: 600;">Medium</span>
+                                {% elif record.risk_level == 'LOW' %}<span style="color: var(--highlight-color); font-weight: 600;">Low</span>
+                                {% else %}<span style="color: var(--text-muted); font-weight: 600;">Pending</span>{% endif %}
+                            </td>
+                            <td style="padding: 0.9rem; border-bottom: 1px solid var(--border-color); display: flex; gap: 0.5rem; align-items: center;">
+                                <a href="{% url 'diagnosis_detail' record.id %}" class="btn btn-secondary" style="padding: 0.4rem 0.7rem; font-size: 0.82rem;">View</a>
+                                <form action="{% url 'diagnosis_delete' record.id %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn" style="padding: 0.4rem 0.7rem; font-size: 0.82rem; background: rgba(185, 28, 28, 0.08); border: 1px solid rgba(185, 28, 28, 0.25); color: var(--danger);" title="Delete Record" onclick="return confirm('Delete this diagnosis record permanently?');">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            {% else %}
+                <p style="color: var(--text-muted); font-style: italic; background: #fff; padding: 1rem; border-radius: 8px; text-align: center;">No recent diagnoses found.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div>
+        <div class="card">
+            <h3 style="margin-top: 0; margin-bottom: 1.2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.45rem;">System Status</h3>
+            <div style="display: flex; align-items: center; margin-bottom: 1rem; background: #fff; padding: 0.75rem; border-radius: 8px; border:1px solid var(--border-color);">
+                <div style="width: 10px; height: 10px; border-radius: 50%; background-color: {% if ml_service_online %}var(--success){% else %}var(--danger){% endif %}; margin-right: 0.75rem;"></div>
+                <span class="text-muted">ML Inference <strong style="margin-left: auto;">{% if ml_service_online %}Online{% else %}Offline{% endif %}</strong></span>
+            </div>
+            <div style="display: flex; align-items: center; background: #fff; padding: 0.75rem; border-radius: 8px; border:1px solid var(--border-color);">
+                <div style="width: 10px; height: 10px; border-radius: 50%; background-color: var(--success); margin-right: 0.75rem;"></div>
+                <span class="text-muted">Database <strong style="margin-left: auto;">Connected</strong></span>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 1.25rem; line-height: 1.5;">
+                End-to-end clinical workflow with role-based dashboards, secured records, and integrated multimodal ML prediction.
+            </p>
+            <h4 style="margin-bottom: 0.5rem;">Patients</h4>
+            <ul style="list-style:none; padding:0; margin:0;">
+                {% for patient in patients %}
+                <li style="padding: 0.45rem 0; border-bottom: 1px solid var(--border-color);">
+                    <a href="{% url 'patient_history' patient.id %}" style="color: var(--text-color); text-decoration: none;">
+                        {{ patient.first_name }} {{ patient.last_name }}
+                    </a>
+                </li>
+                {% empty %}
+                <li class="text-muted">No patients found.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
