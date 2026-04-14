@@ -25,9 +25,17 @@ app.add_middleware(
 MODEL = None
 PREPROCESSORS = None
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODEL_PATH = os.path.join(BASE_DIR, "..", "osteoporosis_multimodal_model_rmsprop_optimized.h5")
-PREPROCESSORS_PATH = os.path.join(BASE_DIR, "..", "preprocessing_objects_rmsprop_optimized.pkl")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+def get_file_path(filename):
+    path1 = os.path.join(BASE_DIR, filename)
+    if os.path.exists(path1):
+        return path1
+    path2 = os.path.join(os.path.dirname(BASE_DIR), filename)
+    return path2 if os.path.exists(path2) else path1
+
+MODEL_PATH = get_file_path("osteoporosis_multimodal_model_rmsprop_optimized.h5")
+PREPROCESSORS_PATH = get_file_path("preprocessing_objects_rmsprop_optimized.pkl")
 
 @app.on_event("startup")
 async def load_model():
