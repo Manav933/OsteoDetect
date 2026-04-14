@@ -156,3 +156,7 @@ async def predict(file: UploadFile = File(...), structured_data: str = Form(...)
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "model_loaded": MODEL is not None}
+
+@app.get("/")
+async def root():
+    return {"message": "OsteoDetect ML Service is running normally."}
