@@ -12,10 +12,9 @@ env = environ.Env(
     DEBUG=(bool, False)
 )
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
-
 SECRET_KEY = env('SECRET_KEY', default='django-insecure-medical-platform-key-placeholder')
 DEBUG = env('DEBUG', default=False)
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost', '*'])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost', '*','osteodetect.onrender.com'])
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=['https://*.onrender.com', 'http://127.0.0.1', 'http://localhost'])
 
 INSTALLED_APPS = [
