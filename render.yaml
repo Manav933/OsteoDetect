@@ -5,6 +5,8 @@ services:
     buildCommand: "cd backend && pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput"
     startCommand: "cd backend && gunicorn config.wsgi:application"
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
       - key: DATABASE_URL
         fromDatabase:
           name: osteo-db
@@ -13,6 +15,10 @@ services:
         generateValue: true
       - key: ML_SERVICE_URL
         value: "https://osteo-ml-service.onrender.com"
+    disk:
+      name: media
+      mountPath: /opt/render/project/src/backend/media
+      sizeGB: 1
 
   - type: web
     name: osteo-ml-service
