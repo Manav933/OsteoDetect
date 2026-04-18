@@ -48,8 +48,7 @@ def register_view(request):
                     gender=gender if gender else 'O',
                 )
             
-            login(request, user)
-            return redirect('dashboard')
+            return redirect('login')
     else:
         form = CustomUserCreationForm()
         

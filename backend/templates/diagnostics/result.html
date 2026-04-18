@@ -67,7 +67,103 @@
             </div>
         </div>
 
-    {% elif diagnosis.status == 'FAILED' %}
+        {% with pclass=diagnosis.pred_class|lower %}
+        <div style="margin-top: 2.5rem; padding-top: 2rem; border-top: 2px dashed var(--border-color);">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: var(--text-color);">{% trans "Comprehensive Assessment & Next Steps" %}</h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                
+                <!-- Explanation Engine -->
+                <div class="card" style="padding: 1.5rem; margin-bottom: 0;">
+                    <h3 style="margin-top: 0; display: flex; align-items: center; gap: 0.6rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                        <span style="font-size: 1.4rem;">🩺</span> {% trans "Diagnosis Details" %}
+                    </h3>
+                    {% if 'osteoporosis' in pclass %}
+                        <p style="margin-bottom: 0.5rem;"><strong style="color: var(--text-muted);">{% trans "Meaning:" %}</strong> {% trans "Severe bone density loss." %}</p>
+                        <p style="margin-bottom: 0.5rem;"><strong style="color: var(--text-muted);">{% trans "Risk:" %}</strong> {% trans "High fracture probability." %}</p>
+                        <p style="margin-bottom: 0;"><strong style="color: var(--text-muted);">{% trans "Symptoms:" %}</strong> {% trans "Back pain, height loss, weak bones." %}</p>
+                    {% elif 'osteopenia' in pclass %}
+                        <p style="margin-bottom: 0.5rem;"><strong style="color: var(--text-muted);">{% trans "Meaning:" %}</strong> {% trans "Lower than normal bone density." %}</p>
+                        <p style="margin-bottom: 0.5rem;"><strong style="color: var(--text-muted);">{% trans "Risk:" %}</strong> {% trans "Can lead to osteoporosis." %}</p>
+                        <p style="margin-bottom: 0;"><strong style="color: var(--text-muted);">{% trans "Alert:" %}</strong> {% trans "Early warning stage." %}</p>
+                    {% else %}
+                        <p style="margin-bottom: 0.5rem;"><strong style="color: var(--text-muted);">{% trans "Meaning:" %}</strong> {% trans "Bone density is healthy." %}</p>
+                        <p style="margin-bottom: 0;"><strong style="color: var(--text-muted);">{% trans "Action:" %}</strong> {% trans "Preventive care recommended." %}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Advice Engine -->
+                <div class="card" style="padding: 1.5rem; margin-bottom: 0; background: #fafafa; border-left: 4px solid var(--highlight-color);">
+                    <h3 style="margin-top: 0; display: flex; align-items: center; gap: 0.6rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+                        <span style="font-size: 1.4rem;">💊</span> {% trans "Medical & Lifestyle Advice" %}
+                    </h3>
+                    <div style="font-size: 0.95rem;">
+                        <strong style="color: var(--text-muted); display: block; margin-top: 0.5rem;">{% trans "Lifestyle & Habits:" %}</strong>
+                        <ul style="margin: 0.5rem 0 1rem; padding-left: 1.2rem; color: #444;">
+                            <li>{% trans "Diet Focus: Calcium-rich foods (milk, almonds, leafy greens), Vitamin D (sunlight exposure)." %}</li>
+                            <li>{% trans "Exercise: Weight-bearing exercises, Yoga, or walking." %}</li>
+                        </ul>
+
+                        {% if 'osteoporosis' in pclass %}
+                            <div style="padding: 0.75rem; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca; margin-bottom: 0.8rem;">
+                                <strong style="color: var(--danger);">⚠️ {% trans "Medical Urgent:" %}</strong> 
+                                <span style="color: #991b1b;">{% trans "Consult an orthopedic doctor immediately. Possible medications include Bisphosphonates or Calcium supplements." %}</span>
+                            </div>
+                            <p style="margin: 0;"><strong style="color: var(--text-muted);">{% trans "Suggestions:" %}</strong> {% trans "Strict fall prevention and bone-strengthening habits." %}</p>
+                        {% elif 'osteopenia' in pclass %}
+                            <div style="padding: 0.75rem; background: #fffbeb; border-radius: 8px; border: 1px solid #fde68a; margin-bottom: 0.8rem;">
+                                <strong style="color: var(--warning);">⚠️ {% trans "Medical Care:" %}</strong> 
+                                <span style="color: #92400e;">{% trans "Regular monitoring and immediate lifestyle improvements recommended." %}</span>
+                            </div>
+                            <p style="margin: 0;"><strong style="color: var(--text-muted);">{% trans "Suggestions:" %}</strong> {% trans "Fall prevention tips and bone-preserving exercises." %}</p>
+                        {% else %}
+                            <div style="padding: 0.75rem; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0; margin-bottom: 0.8rem;">
+                                <strong style="color: var(--success);">✓ {% trans "Health Status:" %}</strong> 
+                                <span style="color: #166534;">{% trans "Maintain healthy habits!" %}</span>
+                            </div>
+                            <p style="margin: 0;"><strong style="color: var(--text-muted);">{% trans "Suggestions:" %}</strong> {% trans "Continue bone-strengthening lifestyle choices." %}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="card" style="padding: 1.5rem; margin-bottom: 0; background: #f5f8fc; border-left: 4px solid var(--btn-primary);">
+                    <h3 style="margin-top: 0; display: flex; align-items: center; gap: 0.6rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; color: var(--btn-primary-hover);">
+                        <span style="font-size: 1.4rem;">🏥</span> {% trans "Clinical Recommendations" %}
+                    </h3>
+                    
+                    {% if 'osteoporosis' in pclass or 'osteopenia' in pclass %}
+                        <strong style="color: var(--text-muted); display: block; margin-top: 0.5rem;">{% trans "Suggested Tests:" %}</strong>
+                        <ul style="margin: 0.5rem 0 1rem; padding-left: 1.2rem; color: #444;">
+                            <li>{% trans "DEXA Scan (If not already done recently)" %}</li>
+                            <li>{% trans "Blood Tests (Evaluating Calcium, Vitamin D levels)" %}</li>
+                        </ul>
+
+                        <strong style="color: var(--text-muted); display: block;">{% trans "Suggested Specialists to Consult:" %}</strong>
+                        <ul style="margin: 0.5rem 0 0; padding-left: 1.2rem; color: #444;">
+                            <li>{% trans "Orthopedic Surgeon" %}</li>
+                            <li>{% trans "Endocrinologist" %}</li>
+                        </ul>
+                    {% else %}
+                        <strong style="color: var(--text-muted); display: block; margin-top: 0.5rem;">{% trans "Suggested Tests:" %}</strong>
+                        <ul style="margin: 0.5rem 0 1rem; padding-left: 1.2rem; color: #444;">
+                            <li>{% trans "Routine check-ups during annual physical" %}</li>
+                        </ul>
+
+                        <strong style="color: var(--text-muted); display: block;">{% trans "Suggested Specialists:" %}</strong>
+                        <ul style="margin: 0.5rem 0 0; padding-left: 1.2rem; color: #444;">
+                            <li>{% trans "General Physician (Primary Care)" %}</li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+
+        <div style="font-size: 0.85rem; color: var(--text-muted); text-align: center; margin-top: 2rem; padding: 1rem; background: #fff; border-radius: 8px; border: 1px dashed var(--border-color);">
+            <strong>{% trans "DISCLAIMER:" %}</strong> {% trans "The above advice is generated by an AI assistant based on the initial inference. It is intended for educational purposes only and DOES NOT substitute professional medical advice, diagnosis, or treatment. Always seek the advice of your physician." %}
+        </div>
+
         <div style="background-color: #fce8e6; padding: 2rem; border-radius: 8px; text-align: center; border: 1px solid var(--danger);">
             <h3 style="color: var(--danger); margin-top: 0;">{% trans "Analysis Failed" %}</h3>
             <p>{% trans "There was an error communicating with the ML diagnostic service. Please try again or contact IT support." %}</p>
