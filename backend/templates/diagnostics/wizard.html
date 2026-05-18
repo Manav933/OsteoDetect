@@ -52,4 +52,16 @@
     </form>
 </div>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const patientSelect = document.getElementById("id_patient");
+        if (patientSelect && patientSelect.options.length > 0) {
+            if (patientSelect.options[0].value === "") {
+                patientSelect.options[0].disabled = true;
+                patientSelect.options[0].hidden = true;
+            }
+        }
+    });
+</script>
+
 {% endblock %}

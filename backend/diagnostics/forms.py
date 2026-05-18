@@ -59,7 +59,9 @@ class DiagnosisForm(forms.ModelForm):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         if self.user and self.user.role == 'DOCTOR':
-            self.fields['patient'].queryset = Patient.objects.all().order_by('first_name', 'last_name')
+            self.fields['patient'].queryset = Patient.objects.exclude(
+                first_name__iexact='Select', last_name__iexact='patient'
+            ).order_by('first_name', 'last_name')
         else:
             self.fields['patient'].widget = forms.HiddenInput()
 
