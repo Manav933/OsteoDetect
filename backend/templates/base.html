@@ -29,6 +29,11 @@
 
         * {
             box-sizing: border-box;
+        }
+
+        /* Prevent inner elements (not html/body) from overflowing horizontally */
+        body > *, .container, .card, .navbar, .page-grid, .page-grid-equal,
+        img, video, iframe, table, pre, input, select, textarea {
             max-width: 100%;
         }
 
@@ -47,9 +52,6 @@
             line-height: 1.6;
             min-height: 100dvh;
             width: 100%;
-            /* Clip horizontal overflow without touching vertical scroll */
-            overflow-x: clip;
-            overscroll-behavior-x: none;
         }
 
         /* Prevent media & tables from ever escaping their container */
